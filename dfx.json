@@ -1,0 +1,17 @@
+{
+  "canisters": {
+    "LostLinker_backend": {
+      "candid": "src/LostLinker_backend/LostLinker_backend.did",
+      "package": "LostLinker_backend",
+      "type": "rust"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
