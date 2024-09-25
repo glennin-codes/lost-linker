@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "src/LostLinker_backend"
+    "src/lost_linker_backend"
 ]
 resolver = "2"

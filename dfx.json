@@ -1,14 +1,14 @@
 {
   "canisters": {
-    "LostLinker_backend": {
-      "candid": "src/LostLinker_backend/LostLinker_backend.did",
-      "package": "LostLinker_backend",
-      "type": "rust"
+    "lost_linker_backend": {
+      "candid": "src/lost_linker_backend/lost_linker_backend.did",
+      "package": "lost_linker_backend",
+      "type": "rust",
+      "wasm": "target/wasm32-unknown-unknown/release/lost_linker_backend.wasm"
     }
   },
   "defaults": {
     "build": {
-      "args": "",
       "packtool": ""
     }
   },

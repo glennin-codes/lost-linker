@@ -1,0 +1,56 @@
+type Category = variant {
+  Jewelry;
+  Personal;
+  Documents;
+  Other;
+  Electronics;
+  Clothing;
+};
+type CustomError = variant {
+  InvalidInput : text;
+  NotificationNotFound;
+  StorageError : text;
+};
+type Data = record { item : Item; message : text };
+type Item = record {
+  id : nat64;
+  status : Status;
+  date : nat64;
+  description : text;
+  category : Category;
+  phone : nat32;
+  reporter : Reporter;
+  location : text;
+};
+type Notification = record {
+  id : nat64;
+  read : bool;
+  recipient : principal;
+  created_at : nat64;
+  message : text;
+  phone : nat32;
+  item_id : nat64;
+};
+type Payload = record {
+  status : Status;
+  description : text;
+  category : Category;
+  phone : nat32;
+  location : text;
+};
+type Reporter = variant { LoserId : principal; FounderId : principal };
+type Result = variant { Ok : text; Err : CustomError };
+type Result_1 = variant { Ok : Data; Err : CustomError };
+type Result_2 = variant { Ok : vec Item; Err : CustomError };
+type Search = record {
+  description : opt text;
+  category : opt Category;
+  location : opt text;
+};
+type Status = variant { Lost; Found };
+service : {
+  delete_notification : (nat64) -> (Result);
+  get_user_notifications : (nat32) -> (vec Notification) query;
+  report_item : (Payload) -> (Result_1);
+  search_lost_items : (Search) -> (Result_2);
+}

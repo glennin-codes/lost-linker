@@ -1,5 +1,5 @@
 [package]
-name = "LostLinker_backend"
+name = "lost_linker_backend"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,3 +12,5 @@ crate-type = ["cdylib"]
 candid = "0.10"
 ic-cdk = "0.13"
 ic-cdk-timers = "0.7" # Feel free to remove this dependency if you don't need timers
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+ic-stable-structures = "0.5.6"
