@@ -1,6 +1,6 @@
 use item::{CustomError, Data, Item, Payload, Reporter, Search, Status, ITEM_ID, STORAGE};
 use ic_cdk::{ api::time, caller, query, update };
-use noification::{ delete_notification_function, notify_reporter, user_notifications, Notification};
+use noification::{ delete_notification_function, notify_reporter, user_notifications, DeleteNoty, Notification, UserNoty};
 
 mod item;
 mod noification;
@@ -144,12 +144,12 @@ fn search_lost_items(
 }
 
 #[query]
-fn get_user_notifications(phone:u32)->Vec<Notification>{
+fn get_user_notifications(UserNoty { phone }: UserNoty)->Vec<Notification>{
     user_notifications(phone)
 }
 #[update]
-fn delete_notification(notification_id:u64)->Result<String,CustomError>{
-    delete_notification_function(notification_id)
+fn delete_notification(DeleteNoty{notification_id,phone}:DeleteNoty)->Result<String,CustomError>{
+    delete_notification_function(notification_id,phone)
 }
 
 ic_cdk::export_candid!();

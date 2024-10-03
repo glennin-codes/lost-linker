@@ -12,6 +12,7 @@ type CustomError = variant {
   StorageError : text;
 };
 type Data = record { item : Item; message : text };
+type DeleteNoty = record { notification_id : nat64; phone : nat32 };
 type Item = record {
   id : nat64;
   status : Status;
@@ -48,9 +49,10 @@ type Search = record {
   location : opt text;
 };
 type Status = variant { Lost; Found };
+type UserNoty = record { phone : nat32 };
 service : {
-  delete_notification : (nat64) -> (Result);
-  get_user_notifications : (nat32) -> (vec Notification) query;
+  delete_notification : (DeleteNoty) -> (Result);
+  get_user_notifications : (UserNoty) -> (vec Notification) query;
   report_item : (Payload) -> (Result_1);
   search_lost_items : (Search) -> (Result_2);
 }

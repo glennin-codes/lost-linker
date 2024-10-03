@@ -4,12 +4,7 @@ use candid::{ CandidType, Decode, Deserialize, Encode, Principal };
 
 use ic_cdk::api::time;
 use ic_stable_structures::{
-    memory_manager::{ MemoryId, MemoryManager, VirtualMemory },
-    BoundedStorable,
-    Cell,
-    DefaultMemoryImpl,
-    StableBTreeMap,
-    Storable,
+    memory_manager::{ MemoryId, MemoryManager, VirtualMemory }, BoundedStorable, Cell, DefaultMemoryImpl, StableBTreeMap, Storable
 };
 use std::borrow::Cow;
 
@@ -28,6 +23,18 @@ pub struct Notification{
     read: bool,
     phone:u32
 }
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct DeleteNoty{
+    pub notification_id:u64,
+   pub  phone:u32
+
+}
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct UserNoty{
+    pub phone:u32
+}
+
 impl Storable for Notification {
     fn to_bytes(&self) -> Cow<[u8]> {
         Cow::Owned(
@@ -91,32 +98,29 @@ fn create_notification(recipient: Principal, message: String, item_id: u64,phone
 pub fn notify_reporter(matched_item:&Item,new_item:&Item){
     match(&matched_item.reporter,&new_item.reporter){
         (Reporter::LoserId(loser),Reporter::FounderId(founder))=>  {
-            let message = format!("Your lost item (ID: {}) has been found. Contact {:?} the finder for more information.", matched_item.id,matched_item.phone);
+            let message = format!("Your lost item (ID: {}) has been found. Contact {:?} the finder for more information.", new_item.id,new_item.phone);
             create_notification(*loser, message, matched_item.id,matched_item.phone);
-            let message = format!("The owner of the item you found (ID: {}) has been identified. Contact the owner {:?}", new_item.id,new_item.phone);
+            let message = format!("The owner of the item you found (ID: {}) has been identified. Contact the owner {:?}", matched_item.id,matched_item.phone);
             create_notification(*founder, message, new_item.id,new_item.phone);
         },
-        (Reporter::FounderId(founder) ,Reporter::LoserId(loser)) =>{
-            let message = format!("The owner of the item you found (ID: {}) has been identified. Contact the owner {:?}", matched_item.id,matched_item.phone);
-            create_notification(*founder, message, matched_item.id,matched_item.phone);
-            
-            let message = format!("Your lost item (ID: {}) has been found. Contact {} the finder for more information.", new_item.id,new_item.phone);
-            create_notification(*loser, message, new_item.id,new_item.phone);
-        },
+        
         _ => {
             ic_cdk::println!("Unexpected reporter combination");
         }
     }
 }
+
 pub fn user_notifications(phone: u32) -> Vec<Notification> {
     NOTIFICATIONS.with(|notifications| {
-        notifications
-            .borrow()
+     let notification_data =   notifications
+            .borrow_mut()
             .iter()
             .filter(|(_, notification)| notification.phone == phone)
-            .map(|(_, notification)| notification)
-            .collect()
+            .map(|(_, mut notification)| {notification.read = true;  notification.clone()})
+            .collect::<Vec<Notification>>();
+        notification_data
     })
+
 }
 // pub fn mark_notification_as_read(notification_id: u64) -> Result<String, CustomError> {
 //     NOTIFICATIONS.with(|notifications| {
@@ -131,13 +135,20 @@ pub fn user_notifications(phone: u32) -> Vec<Notification> {
 //     })
 // }
 
-pub fn delete_notification_function(notification_id: u64)->Result<String,CustomError>{
+
+pub fn delete_notification_function( notification_id: u64, phone:u32 )->Result<String,CustomError>{
     NOTIFICATIONS.with(|not|{
         let mut  notifications=not.borrow_mut();
-if let Some(notify)= notifications.get(&notification_id){
-    notifications.remove(&notification_id);
-    Ok(format!("notification (ID :{:?}) deleted succesfuly ",notify.id))
-}else{
+    let notification_count= notifications.iter().filter(|n| n.1.phone==phone).map(|(_,notification)| notification).collect::<Vec<Notification>>();
+    if notification_count.len() > 0 {
+        if let Some(notify)= notifications.get(&notification_id){
+            notifications.remove(&notification_id);
+            Ok(format!("notification (ID :{:?}) deleted succesfuly ",notify.id))
+        }else{
+            Err(CustomError::NotificationNotFound)
+        }
+    }
+else{
     Err(CustomError::NotificationNotFound)
 }
 
